@@ -1,5 +1,6 @@
-import * as ActionTypes from './ActionTypes';
+import * as ActionTypes from './actionTypes';
 import baseUrl from '../shared/baseUrl';
+import API from '../redux/axiosConfig';
 
 export const fetchComments = () => (dispatch) => {
     return fetch(baseUrl + 'comments')
@@ -106,27 +107,38 @@ export const addPromos = (promos) => ({
 });
 
 export const fetchLeaders = () => (dispatch) => {
-
     dispatch(leadersLoading());
+    return API.get('/meals')
+      .then((res) => {
+        dispatch(addLeaders(res.data.meals.rows));
+      })
+      .catch((error) => {
+        dispatch(leadersFailed(error));
+      });
+  };
 
-    return fetch(baseUrl + 'leaders')
-    .then(response => {
-        if (response.ok) {
-            return response;
-        } else {
-            var error = new Error('Error ' + response.status + ': ' + response.statusText);
-            error.response = response;
-            throw error;
-        }
-        },
-        error => {
-            var errmess = new Error(error.message);
-            throw errmess;
-        })
-    .then(response => response.json())
-    .then(leaders => dispatch(addLeaders(leaders)))
-    .catch(error => dispatch(leadersFailed(error.message)));
-};
+// export const fetchLeaders = () => (dispatch) => {
+
+//     dispatch(leadersLoading());
+
+//     return fetch(baseUrl + '/leaders')
+//     .then(response => {
+//         if (response.ok) {
+//             return response;
+//         } else {
+//             var error = new Error('Error ' + response.status + ': ' + response.statusText);
+//             error.response = response;
+//             throw error;
+//         }
+//         },
+//         error => {
+//             var errmess = new Error(error.message);
+//             throw errmess;
+//         })
+//     .then(response => response.json())
+//     .then(leaders => dispatch(addLeaders(leaders)))
+//     .catch(error => dispatch(leadersFailed(error.message)));
+// };
 
 export const leadersLoading = () => ({
     type: ActionTypes.LEADERS_LOADING

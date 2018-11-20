@@ -1,17 +1,20 @@
 import React, {Component} from 'react';
 import { View, Text, FlatList, ScrollView } from 'react-native';
 import { Card, ListItem } from 'react-native-elements';
-import { leaders } from '../shared/leaders';
+import { connect } from 'react-redux';
+import baseUrl from '../shared/baseUrl';
+import {fetchLeaders} from '../redux/ActionCreators';
+import { Loading } from './Loader';
+
 
 class About extends Component {
-    constructor(props){
-      super(props);
-      this.state = {
-        leaders
-      };
-    }
+
     static navigationOptions = {
       title: 'About Us'
+    }
+
+    componentDidMount(){
+      this.props.fetchLeaders();
     }
 
     renderLeaderItem = ({item, index}) => {
@@ -20,7 +23,7 @@ class About extends Component {
           key={index}
           title={item.name}
           subtitle={item.description}
-          leftAvatar={{ source: require('./images/uthappizza.png')}}
+          leftAvatar={{uri: item.imageurl }}
           hideChevron={true}
         />
       );
@@ -29,7 +32,7 @@ class About extends Component {
     renderLeaders = () => {
       return (
         <FlatList
-          data={this.state.leaders}
+          data={this.props.leaders}
           renderItem={this.renderLeaderItem}
           keyExtractor={item => item.id.toString()}
         />
@@ -37,6 +40,7 @@ class About extends Component {
     }
 
     render(){
+      const { isLoading, leaders } = this.props;
       return (
         <ScrollView style={{marginBottom: 10}}>
           <Card>
@@ -52,14 +56,22 @@ class About extends Component {
             to The Frying Pan, a successful chain started by our CEO, Mr. Peter Pan,
              that featured for the first time the world's best cuisines in a pan.</Text>
           </Card>
-          <Card>
-          <Text style={{textAlign: 'center', fontWeight: '700', margin: 10, borderBottomColor: '#aba8a8', borderBottomWidth: 1, paddingBottom: 10}}>Corporate Leadership</Text>
-            {this.renderLeaders()}
+          <Card title='Corporate Leadership'>
+            { isLoading ? <Loading/> : this.renderLeaders()}
           </Card>
         </ScrollView>
       );
     }
 };
 
-export default About;
+const mapStateToProps = state => ({
+  leaders: state.leaders.leaders,
+  isLoading: state.leaders.isLoading
+});
+
+const mapDispatchToProps = dispatch => ({
+  fetchLeaders: () => dispatch(fetchLeaders()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(About);
 
