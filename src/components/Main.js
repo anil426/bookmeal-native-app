@@ -6,7 +6,9 @@ import Menu from './Menu';
 import Home from './Home';
 import About from './About';
 import Contact from './Contact';
+import Favorites from './Favorites';
 import DishDetail from "./DishDetail";
+import Reservation from './Reservation';
 
 const MenuNavigator = createStackNavigator({
   Menu: {
@@ -100,6 +102,40 @@ const AboutNavigator = createStackNavigator({
   })
 });
 
+const ReservationNavigator = createStackNavigator({
+  Reservation: { screen: Reservation }
+}, {
+  navigationOptions: ({ navigation }) => ({
+    headerStyle: {
+        backgroundColor: "#512DA8"
+    },
+    headerTitleStyle: {
+        color: "#fff"
+    },
+    headerTintColor: "#fff",
+    headerLeft: <Icon name="menu" size={24}
+      iconStyle={{ color: 'white' }}
+      onPress={ () => navigation.navigate('DrawerToggle') } />
+  })
+});
+
+const FavoritesNavigator = createStackNavigator({
+  Favorites: { screen: Favorites }
+}, {
+  navigationOptions: ({ navigation }) => ({
+    headerStyle: {
+        backgroundColor: "#512DA8"
+    },
+    headerTitleStyle: {
+        color: "#fff"
+    },
+    headerTintColor: "#fff",
+    headerLeft: <Icon name="menu" size={24}
+      iconStyle={{ color: 'white' }}
+      onPress={ () => navigation.navigate('DrawerToggle') } />
+  })
+});
+
 const CustomDrawerContentComponent = (props) => (
   <ScrollView>
   <SafeAreaView
@@ -153,6 +189,36 @@ const MainNavigator = createDrawerNavigator({
       )
     }
   },
+  Reservation:
+    { screen: ReservationNavigator,
+      navigationOptions: {
+        title: 'Reserve Table',
+        drawerLabel: 'Reserve Table',
+        drawerIcon: ({ tintColor, focused }) => (
+          <Icon
+            name='cutlery'
+            type='font-awesome'
+            size={24}
+            iconStyle={{ color: tintColor }}
+          />
+        ),
+      }
+    },
+    Favorites:
+        { screen: FavoritesNavigator,
+          navigationOptions: {
+            title: 'My Favorites',
+            drawerLabel: 'My Favorites',
+            drawerIcon: ({ tintColor, focused }) => (
+              <Icon
+                name='heart'
+                type='font-awesome'
+                size={24}
+                iconStyle={{ color: tintColor }}
+              />
+            ),
+          }
+        },
   Contact: {
     screen: ContactNavigator,
     navigationOptions: {
@@ -182,7 +248,7 @@ const MainNavigator = createDrawerNavigator({
         />
       )
     }
-  }
+  },
 }, {
   drawerBackgroundColor: '#D1C4E9',
   contentComponent: CustomDrawerContentComponent

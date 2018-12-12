@@ -1,8 +1,10 @@
 import React, {Component} from 'react';
+import { connect } from 'react-redux';
 import { View, Text, ScrollView, FlatList } from 'react-native';
 import { Card, Icon } from 'react-native-elements';
 import { dishes } from '../shared/dishes';
 import { comments } from '../shared/comments';
+import { addFavorites } from '../redux/ActionCreators';
 
 function RenderDish(props){
   const dish = props.dish;
@@ -62,7 +64,6 @@ class DishDetail extends Component {
     this.state = {
       dishes,
       comments,
-      favorites: []
     };
   }
 
@@ -71,7 +72,7 @@ class DishDetail extends Component {
   }
 
   markFavorite = (dishId) => {
-    this.setState({favorites: this.state.favorites.concat(dishId)});
+    props.addFavorites(dishId);
   }
 
   render(){
@@ -79,7 +80,7 @@ class DishDetail extends Component {
     return (
       <ScrollView>
         <RenderDish
-          favorite={this.state.favorites.some(itemId => itemId === dishId)}
+          favorite={props.favorites.some(itemId => itemId === dishId)}
           onPress={this.markFavorite}
           dish={this.state.dishes[+dishId]}
         />
@@ -89,4 +90,8 @@ class DishDetail extends Component {
   }
 };
 
-export default DishDetail;
+const mapStateToProps = state => ({
+  favorites: state.favorites.favorites,
+});
+
+export default connect(mapStateToProps, { addFavorites })(DishDetail);

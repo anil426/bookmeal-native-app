@@ -69,6 +69,11 @@ export const addDishes = (dishes) => ({
     payload: dishes
 });
 
+export const addFavorites = (dishId) => ({
+    type: ActionTypes.ADD_FAVORITES,
+    payload: dishId
+});
+
 export const fetchPromos = () => (dispatch) => {
 
     dispatch(promosLoading());
