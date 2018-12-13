@@ -23,7 +23,7 @@ function RenderDish(props){
           size={12}
           color='#f50'
           type='font-awesome'
-          onPress={props.favorite ? console.log('Already a favorite') : () => props.onPress(dish.id)}
+          onPress={() => props.favorite ? console.log('Already a favorite') : props.onPress(dish.id)}
         />
       </Card>
     );
@@ -72,7 +72,7 @@ class DishDetail extends Component {
   }
 
   markFavorite = (dishId) => {
-    props.addFavorites(dishId);
+    this.props.addFavorites(dishId);
   }
 
   render(){
@@ -80,7 +80,7 @@ class DishDetail extends Component {
     return (
       <ScrollView>
         <RenderDish
-          favorite={props.favorites.some(itemId => itemId === dishId)}
+          favorite={this.props.favorites.some(itemId => itemId === dishId)}
           onPress={this.markFavorite}
           dish={this.state.dishes[+dishId]}
         />

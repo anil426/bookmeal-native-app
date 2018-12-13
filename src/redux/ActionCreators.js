@@ -74,6 +74,11 @@ export const addFavorites = (dishId) => ({
     payload: dishId
 });
 
+export const removeFavorite = (dishId) => ({
+    type: ActionTypes.REMOVE_FAVORITE,
+    payload: dishId
+});
+
 export const fetchPromos = () => (dispatch) => {
 
     dispatch(promosLoading());
