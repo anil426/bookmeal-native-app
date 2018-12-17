@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { View, Text, ScrollView, FlatList, Alert, PanResponder } from 'react-native';
+import { View, Text, ScrollView, FlatList, Alert, PanResponder, Share, StyleSheet } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { Card, Icon } from 'react-native-elements';
 import { dishes } from '../shared/dishes';
 import { comments } from '../shared/comments';
 import { addFavorites } from '../redux/ActionCreators';
+import baseUrl from '../shared/baseUrl';
 
 function RenderDish(props) {
   const dish = props.dish;
@@ -42,6 +43,16 @@ function RenderDish(props) {
     }
   });
 
+  const shareDish = (title, message, url) => {
+    Share.share({
+      title: title,
+      message: title + ': ' + message + ' ' + url,
+      url: url
+    }, {
+        dialogTitle: 'Share ' + title
+      })
+  }
+
   if (dish) {
     return (
       <Animatable.View
@@ -55,15 +66,25 @@ function RenderDish(props) {
           image={require('./images/uthappizza.png')}
         >
           <Text style={{ margin: 10 }}>{dish.description}</Text>
-          <Icon
-            raised
-            reverse
-            name={props.favorite ? 'heart' : 'heart-o'}
-            size={12}
-            color='#f50'
-            type='font-awesome'
-            onPress={() => props.favorite ? console.log('Already a favorite') : props.onPress(dish.id)}
-          />
+          <View style={styles.icons}>
+            <Icon
+              raised
+              reverse
+              name={props.favorite ? 'heart' : 'heart-o'}
+              size={12}
+              color='#f50'
+              type='font-awesome'
+              onPress={() => props.favorite ? console.log('Already a favorite') : props.onPress(dish.id)}
+            />
+            <Icon
+              raised
+              reverse
+              name='share'
+              size={12}
+              type='font-awesome'
+              color='#51D2A8'
+              onPress={() => shareDish(dish.name, dish.description, baseUrl + dish.image)} />
+          </View>
         </Card>
       </Animatable.View>
     );
@@ -131,6 +152,14 @@ class DishDetail extends Component {
     );
   }
 };
+
+const styles = StyleSheet.create({
+  icons: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  }
+});
 
 const mapStateToProps = state => ({
   favorites: state.favorites.favorites,
