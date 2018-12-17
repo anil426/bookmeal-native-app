@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, StyleSheet, Picker, Switch, Button, Modal } from 'react-native';
+import { Text, View, ScrollView, StyleSheet, Picker, Switch, Button, Modal, Platform, Alert } from 'react-native';
 import { Card } from 'react-native-elements';
 import DatePicker from 'react-native-datepicker'
 import * as Animatable from 'react-native-animatable';
-import { Permissions, Notifications } from 'expo';
-
+import { Permissions, Notifications, Constants, Calendar } from 'expo';
+import moment from 'moment';
 class Reservation extends Component {
 
   constructor(props) {
@@ -66,6 +66,94 @@ class Reservation extends Component {
         color: '#512DA8'
       }
     });
+  }
+
+  askForCalendarPermissions = async () => {
+    const response = await Permissions.askAsync(Permissions.CALENDAR)
+    return response.status === 'granted'
+  }
+
+  askForReminderPermissions = async () => {
+    if (Platform.OS === 'android') {
+      return true
+    }
+
+    const response = await Permissions.askAsync(Permissions.REMINDERS)
+    return response.status === 'granted'
+  }
+
+  findCalendars = async () => {
+    const calendarGranted = await this.askForCalendarPermissions()
+    const reminderGranted = await this.askForReminderPermissions()
+    let calendars = []
+
+    if (calendarGranted && reminderGranted) {
+      calendars = await Calendar.getCalendarsAsync()
+    }
+
+    return calendars
+  }
+
+  createNewCalendar = async (calendars) => {
+    const newCalendar = {
+      title: 'test',
+      entityType: Calendar.EntityTypes.EVENT,
+      color: '#2196F3',
+      sourceId:
+        Platform.OS === 'ios'
+          ? calendars.find(cal => cal.source && cal.source.name === 'Default').source.id
+          : undefined,
+      source:
+        Platform.OS === 'android'
+          ? {
+            name: calendars.find(cal => cal.accessLevel === Calendar.CalendarAccessLevel.OWNER).source.name,
+            isLocalAccount: true
+          }
+          : undefined,
+      name: 'test',
+      accessLevel: Calendar.CalendarAccessLevel.OWNER,
+      ownerAccount:
+        Platform.OS === 'android'
+          ? calendars.find(cal => cal.accessLevel == Calendar.CalendarAccessLevel.OWNER).ownerAccount
+          : undefined
+    }
+
+    let calendarId = null
+
+    try {
+      calendarId = await Calendar.createCalendarAsync(newCalendar)
+    } catch (e) {
+      Alert.alert('Event cannot be saved', e.message)
+    }
+
+    return calendarId
+  }
+
+  addEventsToCalendar = async (calendarId) => {
+    const event = {
+      title: `RESERVED: Table for ${this.state.guests} at Triple 7`,
+      location: '57 Peamark Estate, Ajao Estate',
+      startDate: moment().toDate(),
+      endDate: moment().add(1, 'hours').toDate(),
+      timeZone: 'Europe/Zurich'
+    }
+
+    try {
+      await Calendar.createEventAsync(calendarId.toString(), event)
+    } catch (e) {
+      Alert.alert('Une erreur est survenue lors de l\'ajout de vos indisponiblité à votre calendrier')
+    }
+  }
+
+  synchronizeCalendar = async () => {
+    let calendars = await this.findCalendars()
+    const calendarId = await this.createNewCalendar(calendars)
+    try {
+      await this.addEventsToCalendar(calendarId)
+      Alert.alert('Your calendar was updated')
+    } catch (e) {
+      Alert.alert('Something went wrong adding event', e.message)
+    }
   }
 
   render() {
@@ -141,7 +229,7 @@ class Reservation extends Component {
               <Text style={styles.modalText}>Date and Time: {this.state.date}</Text>
 
               <Button
-                onPress={() => { this.toggleModal(); this.resetForm(); }}
+                onPress={() => { this.toggleModal(); this.synchronizeCalendar(); this.resetForm(); }}
                 color="#512DA8"
                 title="Close"
               />
